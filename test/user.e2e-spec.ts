@@ -61,20 +61,22 @@ describe('User', () => {
         .post('/users/register')
         .send({
           displayName: "Nooby Noob",
-          email: "nooby@example.com"
+          email: "nooby@example.com",
+          phoneNumber: "+358401231234"
         })
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(201);
         // https://stackoverflow.com/a/47904961/315168
-      expect(body).toMatchObject({displayName: "Nooby Noob", email: "nooby@example.com"});
+      expect(body).toMatchObject({displayName: "Nooby Noob", email: "nooby@example.com", phoneNumber: '+358401231234'});
 
       // Check that the opbject was persistent in the database
-      let [userOne] = await repository.find();
+      const [userOne] = await repository.find();
       
       expect(userOne.confirmedEmail).toBeNull(); // Separate call to confirmation needed
       expect(userOne.pendingEmail).toBe("nooby@example.com");
       expect(userOne.displayName).toBe("Nooby Noob");
+      expect(userOne.phoneNumber).toBe("+358401231234");
       expect(userOne.emailConfirmationToken).not.toBeNull();
 
     });    
@@ -86,28 +88,30 @@ describe('User', () => {
         .post('/users/register')
         .send({
           displayName: "Nooby Noob",
-          email: "nooby@example.com"
+          email: "nooby@example.com",
+          phoneNumber: "+358401231234"
         })
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(201);
 
       // https://stackoverflow.com/a/47904961/315168
-      expect(body).toMatchObject({displayName: "Nooby Noob", email: "nooby@example.com"});
+      expect(body).toMatchObject({displayName: "Nooby Noob", email: "nooby@example.com", phoneNumber: '+358401231234'});
 
       const { body: body2 } = await supertest
         .agent(app.getHttpServer())
         .post('/users/register')
         .send({
           displayName: "Boom Headshotter",
-          email: "boom@example.com"
+          email: "boom@example.com",
+          phoneNumber: "+358401231234"
         })
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(201);
 
       // https://stackoverflow.com/a/47904961/315168
-      expect(body2).toMatchObject({displayName: "Boom Headshotter", email: "boom@example.com"});
+      expect(body2).toMatchObject({displayName: "Boom Headshotter", email: "boom@example.com", phoneNumber: '+358401231234'});
     
     });        
 
@@ -118,7 +122,8 @@ describe('User', () => {
         .post('/users/register')
         .send({
           displayName: "Nooby Noob",
-          email: "nooby@example.com"
+          email: "nooby@example.com",
+          phoneNumber: "+358401231234"
         })
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
@@ -129,14 +134,15 @@ describe('User', () => {
         .post('/users/register')
         .send({
           displayName: "Nooby Noob",
-          email: "nooby@example.com"
+          email: "nooby@example.com",
+          phoneNumber: "+358401231234"
         })
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(500);
 
       // Check that the opbject was persistent in the database
-      let users = await repository.find();
+      const users = await repository.find();
       expect(users.length).toBe(1);
       
     });
@@ -148,7 +154,8 @@ describe('User', () => {
         .post('/users/register')
         .send({
           displayName: "Nooby Noob",
-          email: "Nooby@Example.com"
+          email: "Nooby@Example.com",
+          phoneNumber: "+358401231234"
         })
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
@@ -166,13 +173,74 @@ describe('User', () => {
       expect(body).toEqual({email: "nooby@example.com"});
 
       // Check that the opbject was persistent in the database
-      let [userOne] = await repository.find();
+      const [userOne] = await repository.find();
       expect(userOne.confirmedEmail).toBe("nooby@example.com"); // Separate call to confirmation needed
       expect(userOne.pendingEmail).toBe("nooby@example.com");
       expect(userOne.emailConfirmationCompletedAt).not.toBeNull();
       expect(userOne.emailConfirmationToken).toBeNull();
       
     });    
+
+    describe('should return error on invalid phone numbers', () => {
+
+      it('on country code different of 35', async () => {
+        await supertest
+          .agent(app.getHttpServer())
+          .post('/users/register')
+          .send({
+            displayName: "Nooby Noob",
+            email: "nooby@example.com",
+            phoneNumber: "+378401231234"
+          })
+          .set('Accept', 'application/json')
+          .expect('Content-Type', /json/)
+          .expect(500);
+      });
+
+      it('on without plus character', async () => {
+        await supertest
+        .agent(app.getHttpServer())
+        .post('/users/register')
+        .send({
+          displayName: "Nooby Noob",
+          email: "nooby@example.com",
+          phoneNumber: "378401231234"
+        })
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(500);
+      });
+
+      it('on incomplete phone number', async () => {
+        await supertest
+        .agent(app.getHttpServer())
+        .post('/users/register')
+        .send({
+          displayName: "Nooby Noob",
+          email: "nooby@example.com",
+          phoneNumber: "+351234"
+        })
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(500);
+      });
+
+      it('on empty value', async () => {
+
+        await supertest
+          .agent(app.getHttpServer())
+          .post('/users/register')
+          .send({
+            displayName: "Nooby Noob",
+            email: "nooby@example.com",
+            phoneNumber: ""
+          })
+          .set('Accept', 'application/json')
+          .expect('Content-Type', /json/)
+          .expect(500);
+
+      });    
+    });
 
   });
 });
