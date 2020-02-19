@@ -59,11 +59,11 @@ export class User {
     emailConfirmationCompletedAt: Date;
     
     // TODO: Phone number field
-    @Column({ length: 13, nullable: false })
-    @IsNotEmpty()
-    @Matches(/^[+]35[0-9]{10}$/, {
-        message: "Invalid phone number"
+    @Column({ length: 15, nullable: false })
+    @Matches(/^[+]\d*$/, {
+        message: "Invalid phone number: Missing country code"
     })
+    @IsNotEmpty()
     phoneNumber: string;
 
     // We ignore the password field in the context of this exercise,

@@ -49,7 +49,7 @@ export class UserService {
         const u = new User();
         u.displayName = displayName;
         u.pendingEmail = email;
-        u.phoneNumber = phoneNumber;
+        u.phoneNumber = this.cleanPhoneNumber(phoneNumber);
         u.emailConfirmationRequestedAt = new Date();
         // https://stackoverflow.com/a/47496558/315168
         u.emailConfirmationToken = [...Array(16)].map(() => Math.random().toString(36)[2]).join(''); // TODO: Add a crypto secure user reasdable random token
@@ -149,5 +149,9 @@ export class UserService {
         await this.userRepository.save(record);
         return record;
     }    
+
+    cleanPhoneNumber(phoneNumber = '') {
+        return phoneNumber.trim().replace(/[^+0-9]/g, '');
+    }
             
 }

@@ -4,7 +4,7 @@ export class AddPhoneNumberOnUser1581976641703 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<any> {
     await queryRunner.query(
       `ALTER TABLE site_user
-        ADD COLUMN phoneNumber varchar(13)  NOT NULL;`,
+        ADD COLUMN phoneNumber varchar(15)  NOT NULL;`,
       undefined,
     );
   }

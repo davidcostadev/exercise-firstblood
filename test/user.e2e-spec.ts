@@ -181,24 +181,33 @@ describe('User', () => {
       
     });    
 
+
+    it('Should accepct valid numbers with space and cleaning spaces', async () => {
+
+      const {body} = await supertest
+        .agent(app.getHttpServer())
+        .post('/users/register')
+        .send({
+          displayName: "Nooby Noob",
+          email: "nooby@example.com",
+          phoneNumber: "+55 84 98831-9033"
+        })
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(201);
+
+        expect(body).toMatchObject({phoneNumber: "+5584988319033"});
+
+        // Check that the opbject was persistent in the database
+        const [userOne] = await repository.find();
+        expect(userOne.phoneNumber).toBe("+5584988319033");
+
+    });  
+
     describe('should return error on invalid phone numbers', () => {
 
-      it('on country code different of 35', async () => {
-        await supertest
-          .agent(app.getHttpServer())
-          .post('/users/register')
-          .send({
-            displayName: "Nooby Noob",
-            email: "nooby@example.com",
-            phoneNumber: "+378401231234"
-          })
-          .set('Accept', 'application/json')
-          .expect('Content-Type', /json/)
-          .expect(500);
-      });
-
       it('on without plus character', async () => {
-        await supertest
+        const {body} =await supertest
         .agent(app.getHttpServer())
         .post('/users/register')
         .send({
@@ -209,25 +218,13 @@ describe('User', () => {
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(500);
-      });
 
-      it('on incomplete phone number', async () => {
-        await supertest
-        .agent(app.getHttpServer())
-        .post('/users/register')
-        .send({
-          displayName: "Nooby Noob",
-          email: "nooby@example.com",
-          phoneNumber: "+351234"
-        })
-        .set('Accept', 'application/json')
-        .expect('Content-Type', /json/)
-        .expect(500);
+        expect(body.errorMessage).toBe('Invalid phone number: Missing country code')
       });
 
       it('on empty value', async () => {
 
-        await supertest
+        const {body} = await supertest
           .agent(app.getHttpServer())
           .post('/users/register')
           .send({
@@ -239,6 +236,7 @@ describe('User', () => {
           .expect('Content-Type', /json/)
           .expect(500);
 
+          expect(body.errorMessage).toBe('phoneNumber should not be empty')
       });    
     });
 
