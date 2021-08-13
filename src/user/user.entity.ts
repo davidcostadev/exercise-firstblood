@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, Generated, CreateDateColumn, UpdateDateColumn } from 'typeorm';
-import {IsEmail, IsOptional} from "class-validator";
+import {IsEmail, IsOptional, IsNotEmpty, Matches} from "class-validator";
 
 
 
@@ -59,6 +59,12 @@ export class User {
     emailConfirmationCompletedAt: Date;
     
     // TODO: Phone number field
+    @Column({ length: 15, nullable: false })
+    @Matches(/^[+]\d*$/, {
+        message: "Invalid phone number: Missing country code"
+    })
+    @IsNotEmpty()
+    phoneNumber: string;
 
     // We ignore the password field in the context of this exercise,
     // as asking a truly safe password management routines 

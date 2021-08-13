@@ -17,10 +17,11 @@ export class UserController {
         type: UserOwnInfoDto
       })    
     async register(@Body() data: RegisterUserDto): Promise<UserOwnInfoDto> {
-        const u = await this.userService.register(data.email, data.displayName);                
+        const u = await this.userService.register(data.email, data.displayName, data.phoneNumber);                
         return {
             email: u.pendingEmail,  // Emails get lowercased 
             displayName: u.displayName,
+            phoneNumber: u.phoneNumber,
             publicId: u.publicId
         }
     }    

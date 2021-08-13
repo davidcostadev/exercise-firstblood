@@ -7,12 +7,14 @@
 export class UserOwnInfoDto {
     readonly displayName: string;
     readonly email: string;
+    readonly phoneNumber: string;
     readonly publicId: string;    
 }
 
 export class RegisterUserDto {
     email: string;
     displayName: string;
+    phoneNumber: string;
 }
 
 export class ConfirmUserDto {
